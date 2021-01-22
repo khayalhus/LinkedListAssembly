@@ -8,7 +8,7 @@
 ;@member1 Ali Kerem Yildiz
 ;@member2 Yekta Can Tursun
 ;@member3 Elaa Jamazi
-;@member4 Lal Verda Çakir
+;@member4 Lal Verda Cakir
 ;@member5 Khayal Huseynov
 ;*******************************************************************************
 ;*******************************************************************************
@@ -275,7 +275,27 @@ Init_GlobVars	FUNCTION
 ;@return 	R0 <- The allocated area address
 Malloc			FUNCTION			
 ;//-------- <<< USER CODE BEGIN System Tick Handler >>> ----------------------	
-				
+						MOVS R0, #0					; use as iterator, set it to 0
+						LDR R1, =AT_SIZE			; get AT_SIZE value
+						LDR R2, =AT_MEM				; get address of AT_MEM
+						CMP R0, R1					; compare R1 and R2
+						BEQ return_malloc_error		; return error
+
+						LDR R3, [R2, R0]			; load next element's allocation value
+malloc_compare			CMP R3, #0					; check if node is empty
+						BEQ return_malloc_address	; if it is return its address
+						ADDS R0, R0, #4				; iterator++
+						B	malloc_compare			; check next location
+
+return_malloc_address	MOVS R3, #1					; value to be written
+						STR R3, [R2, R0]			; write 1 to newly allocated space at allocation table
+						LSLS R0, #1					; multiply by 2
+						LDR R3, =DATA_MEM			; get the first element's address
+						ADDS R0, R0, R3				; add that to offset (R0)
+						BX LR						; return R0
+
+return_malloc_error		MOVS R0, #0					; return R0 as 0
+						BX LR						; return 0
 ;//-------- <<< USER CODE END System Tick Handler >>> ------------------------				
 				ENDFUNC
 				
@@ -285,7 +305,21 @@ Malloc			FUNCTION
 ;@param		R0 <- Address to deallocate
 Free			FUNCTION			
 ;//-------- <<< USER CODE BEGIN Free Function >>> ----------------------
-				
+						LDR R1, =DATA_MEM					; get address of DATA_MEM
+						MOVS R2, #0							; use R2 as allocation table traverser, set it to 0
+free_loop				CMP R1, R0							; check addresses
+						BNE free_next_check					; go to next address
+
+						; if equal, address is found
+						LSLS R2, #2							; multiply by 4
+						MOVS R1, #0							; value to be stored
+						LDR R3, =AT_MEM						; get address of AT_MEM
+						STR R1, [R3, R2]					; allocation table write 0
+						BX LR								; return after freeing address
+
+free_next_check			ADDS R2, R2, #1						; increment allocation table traverser
+						ADDS R1, R1, #8						; increment DATA_MEM iterator
+						B free_loop							; return to loop condition check
 ;//-------- <<< USER CODE END Free Function >>> ------------------------				
 				ENDFUNC
 				
