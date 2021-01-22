@@ -134,9 +134,9 @@ __LOG_END
 				ALIGN 
 __main			FUNCTION
 				EXPORT __main
-				;BL	Clear_Alloc					; Call Clear Allocation Function.
-				;BL  Clear_ErrorLogs				; Call Clear ErrorLogs Function.
-				;BL	Init_GlobVars				; Call Initiate Global Variable Function.
+				BL	Clear_Alloc					; Call Clear Allocation Function.
+				BL  Clear_ErrorLogs				; Call Clear ErrorLogs Function.
+				BL	Init_GlobVars				; Call Initiate Global Variable Function.
 				BL	SysTick_Init				; Call Initialize System Tick Timer Function.
 				LDR R0, =PROGRAM_STATUS			; Load Program Status Variable Addresses.
 LOOP			LDR R1, [R0]					; Load Program Status Variable.
@@ -191,7 +191,17 @@ SysTick_Init	FUNCTION
 ;@brief 	This function will be used to stop the System Tick Timer
 SysTick_Stop	FUNCTION			
 ;//-------- <<< USER CODE BEGIN System Tick Timer Stop >>> ----------------------	
-				
+				; turn off timer
+				LDR R0, =0xE000E010					; Get the address of SYST_CSR
+				LDR R1, [R0]						; Get value of SYST_CSR
+				LDR R2, =0xFFFFFFFE					; intermediate value
+				ANDS R1, R1, R2						; clear the least significant 3 bits of SYST_CSR
+				STR R1, [R0]						; Store back the value to SYST_CSR
+				;update the program status register
+				LDR R0, =PROGRAM_STATUS				; Get the address of PROGRAM_STATUS variable
+				MOVS R1, #2							; store value 2 in R1
+				STR R1, [R0, #0]					; set PROGRAM_STATUS as 2
+				BX LR								; return back
 ;//-------- <<< USER CODE END System Tick Timer Stop >>> ------------------------				
 				ENDFUNC
 
@@ -200,7 +210,19 @@ SysTick_Stop	FUNCTION
 ;@brief 	This function will be used to clear allocation table
 Clear_Alloc		FUNCTION			
 ;//-------- <<< USER CODE BEGIN Clear Allocation Table Function >>> ----------------------															
-				
+							LDR R0, =AT_SIZE					; Get value of allocation table size
+							MOVS R3, #0							; Use R3 as iterator
+							LDR R1, =AT_MEM						; Get address of AT_MEM
+							MOVS R2, #0							; get value to be stored
+
+clear_alloc_loop			CMP R0, R3				; compare R0 with R3 (iterator)
+							BEQ return_clear_alloc	; return back if equal
+							
+							STR R2, [R1, R3]		; write 0 to R1 + R3
+							ADDS R3, R3, #4			; i++
+							B clear_alloc_loop		; go back to condition check
+							
+return_clear_alloc			BX LR					; return back
 ;//-------- <<< USER CODE END Clear Allocation Table Function >>> ------------------------				
 				ENDFUNC
 				
@@ -208,8 +230,21 @@ Clear_Alloc		FUNCTION
 
 ;@brief 	This function will be used to clear error log array
 Clear_ErrorLogs	FUNCTION			
-;//-------- <<< USER CODE BEGIN Clear Error Logs Function >>> ----------------------															
-				
+;//-------- <<< USER CODE BEGIN Clear Error Logs Function >>> ----------------------		
+							
+							LDR R0, =LOG_ARRAY_SIZE				; Get value of LOG_ARRAY_SIZE
+							MOVS R3, #0							; Use R3 as iterator
+							LDR R1, =LOG_MEM					; Get address of LOG_MEM
+							MOVS R2, #0							; get value to be stored
+
+clear_error_loop			CMP R0, R3				; compare R0 with R3 (iterator)
+							BEQ return_error_alloc	; return back if equal
+							
+							STR R2, [R1, R3]		; write 0 to R1 + R3
+							ADDS R3, R3, #4			; i++
+							B clear_error_loop		; go back to condition check
+							
+return_error_alloc			BX LR					; return back
 ;//-------- <<< USER CODE END Clear Error Logs Function >>> ------------------------				
 				ENDFUNC
 				
@@ -218,7 +253,18 @@ Clear_ErrorLogs	FUNCTION
 ;@brief 	This function will be used to initialize global variables
 Init_GlobVars	FUNCTION			
 ;//-------- <<< USER CODE BEGIN Initialize Global Variables >>> ----------------------															
-				
+				MOVS R0, #0					; value to be stored
+				LDR R1, =TICK_COUNT			; get address of TICK_COUNT
+				STR R0, [R1]				; write 0 to TICK_COUNT
+				LDR R1, =FIRST_ELEMENT		; get address of FIRST_ELEMENT
+				STR R0, [R1]				; write 0 to FIRST_ELEMENT
+				LDR R1, =INDEX_INPUT_DS		; get address of INDEX_INPUT_DS
+				STR R0, [R1]				; write 0 to INDEX_INPUT_DS
+				LDR R1, =INDEX_ERROR_LOG	; get address of INDEX_ERROR_LOG
+				STR R0, [R1]				; write 0 to INDEX_ERROR_LOG
+				LDR R1, =PROGRAM_STATUS		; get address of PROGRAM_STATUS
+				STR R0, [R1]				; write 0 to PROGRAM_STATUS
+				BX LR						; return back
 ;//-------- <<< USER CODE END Initialize Global Variables >>> ------------------------				
 				ENDFUNC
 				
