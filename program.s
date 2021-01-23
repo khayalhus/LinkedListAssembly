@@ -1,7 +1,7 @@
 ;*******************************************************************************
 ;@file				 Main.s
 ;@project		     Microprocessor Systems Term Project
-;@date
+;@date				 31/01/2021
 ;
 ;@PROJECT GROUP
 ;@groupno 37
@@ -158,8 +158,9 @@ STOP			B	STOP						; Infinite loop.
 SysTick_Handler	FUNCTION			
 ;//-------- <<< USER CODE BEGIN System Tick Handler >>> ----------------------															
 				EXPORT SysTick_Handler
-				ADDS R0, #1
-				BX LR
+				PUSH{LR}
+				BL Malloc
+				POP{PC}
 ;//-------- <<< USER CODE END System Tick Handler >>> ------------------------				
 				ENDFUNC
 
@@ -275,27 +276,44 @@ Init_GlobVars	FUNCTION
 ;@return 	R0 <- The allocated area address
 Malloc			FUNCTION			
 ;//-------- <<< USER CODE BEGIN System Tick Handler >>> ----------------------	
-						MOVS R0, #0					; use as iterator, set it to 0
+						MOVS R0, #0					; use as word iterator, set it to 0 (0->AT_SIZE)
+						MOVS R6, #0					; use as bit accumulator	(0->AT_SIZE)
 						LDR R1, =AT_SIZE			; get AT_SIZE value
 						LDR R2, =AT_MEM				; get address of AT_MEM
-						CMP R0, R1					; compare R1 and R2
-						BEQ return_malloc_error		; return error
+malloc_loop1			CMP R0, R1					; check if we reached end of AT
+						BEQ return_malloc_error		; return error code (0)
+						
+						LDR R3, [R2, R0]			; get a word of AT
+						MOVS R5, #0					; use as temporary bit iterator, set it to 0 (0->32)
+						MOVS R4, #1					; value to be ANDed by
+malloc_loop2			CMP R5, #32					; if equal to 32
+						BEQ return_exit_loop2		; return from the second for loop
+						
+						MOVS R7, R4
+						ANDS R7, R3, R7				; get a bit of word
+						CMP R7, #0					; if node is empty
+						BEQ return_malloc_address	; return the address of it
+						ADDS R5, R5, #1				; increment bit iterator
+						ADDS R6, R6, #1				; increment bit accumulator
+						LSLS R4, #1					; do bitwise right shift
+						B malloc_loop2				; go to next iteration of second for loop
+						
+return_exit_loop2		ADDS R0, R0, #4				; go to next word
+						B malloc_loop1				; go to next iteration of first for loop
+						
+return_malloc_address	ORRS R3, R3, R4				
+						STR R3, [R2, R0]
+						LDR R0, =DATA_MEM
+						MOVS R1, #8
+						MULS R6, R1, R6
+						ADDS R0, R6, R0
+						BX LR
+						
+return_malloc_error		MOVS R0, #0
+						BX LR
+						
+						
 
-						LDR R3, [R2, R0]			; load next element's allocation value
-malloc_compare			CMP R3, #0					; check if node is empty
-						BEQ return_malloc_address	; if it is return its address
-						ADDS R0, R0, #4				; iterator++
-						B	malloc_compare			; check next location
-
-return_malloc_address	MOVS R3, #1					; value to be written
-						STR R3, [R2, R0]			; write 1 to newly allocated space at allocation table
-						LSLS R0, #1					; multiply by 2
-						LDR R3, =DATA_MEM			; get the first element's address
-						ADDS R0, R0, R3				; add that to offset (R0)
-						BX LR						; return R0
-
-return_malloc_error		MOVS R0, #0					; return R0 as 0
-						BX LR						; return 0
 ;//-------- <<< USER CODE END System Tick Handler >>> ------------------------				
 				ENDFUNC
 				
