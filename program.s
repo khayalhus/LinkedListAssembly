@@ -276,6 +276,7 @@ Init_GlobVars	FUNCTION
 ;@return 	R0 <- The allocated area address
 Malloc			FUNCTION			
 ;//-------- <<< USER CODE BEGIN System Tick Handler >>> ----------------------	
+						PUSH{R4-R7}
 						MOVS R0, #0					; use as word iterator, set it to 0 (0->AT_SIZE)
 						MOVS R6, #0					; use as bit accumulator	(0->AT_SIZE)
 						LDR R1, =AT_SIZE			; get AT_SIZE value
@@ -307,6 +308,7 @@ return_malloc_address	ORRS R3, R3, R4
 						MOVS R1, #8
 						MULS R6, R1, R6
 						ADDS R0, R6, R0
+						POP{R7, R6, R5, R4}
 						BX LR
 						
 return_malloc_error		MOVS R0, #0
@@ -325,17 +327,22 @@ Free			FUNCTION
 ;//-------- <<< USER CODE BEGIN Free Function >>> ----------------------
 						LDR R1, =DATA_MEM					; get address of DATA_MEM
 						MOVS R2, #0							; use R2 as allocation table traverser, set it to 0
+						LDR R3, =AT_MEM						; get address of AT_MEM
+						MOVS R4, #1							; value to be negated
 free_loop				CMP R1, R0							; check addresses
 						BNE free_next_check					; go to next address
-
+						
 						; if equal, address is found
-						LSLS R2, #2							; multiply by 4
-						MOVS R1, #0							; value to be stored
-						LDR R3, =AT_MEM						; get address of AT_MEM
+						LDR R1, [R3, R2]					; get the word
+						BICS R1, R1, R4						; negate R4
 						STR R1, [R3, R2]					; allocation table write 0
 						BX LR								; return after freeing address
 
-free_next_check			ADDS R2, R2, #1						; increment allocation table traverser
+free_next_check			LSLS R4, #1							; shift left by 1 bit
+						CMP R4, #0							; ensure circular rotation
+						BNE free_next						; if value overflowed
+						MOVS R4, #1							; reset it (if not skip this line)
+free_next				ADDS R2, R2, #4						; increment allocation table traverser
 						ADDS R1, R1, #8						; increment DATA_MEM iterator
 						B free_loop							; return to loop condition check
 ;//-------- <<< USER CODE END Free Function >>> ------------------------				
