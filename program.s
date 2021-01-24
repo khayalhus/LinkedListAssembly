@@ -414,7 +414,45 @@ error_duplicate			BL Free							; deallocate memory since it was not used
 ;@return    R0 <- Error Code
 Remove			FUNCTION			
 ;//-------- <<< USER CODE BEGIN Remove Function >>> ----------------------															
-				
+						PUSH{LR, R4}					; preserve LR
+						MOVS R1, R0						; copy value to R1
+						LDR R0, =FIRST_ELEMENT			; get FIRST_ELEMENT's address
+						LDR R0, [R0]					; get FIRST_ELEMENT's value which is head address
+						CMP R0, #0						; if(head == NULL)
+						BEQ remove_error_empty			; if list is empty go here
+						
+						LDR R3, [R0]					; R3 = head->data
+						CMP R3, R1						; if (head->data == value)
+						BEQ remove_head					; if value is head's data go here
+						
+						MOVS R2, #0						; prev = NULL
+remove_loop				CMP R0, #0						; if (traverse == NULL)
+						BEQ remove_error_notfound		; go here if data is not found
+						
+						LDR R3, [R0]					; temp_data = traverse->data
+						CMP R1, R3						; if (value == temp_data)
+						BEQ remove_free_node			; if found remove it
+						
+						MOVS R2, R0						; prev = traverse
+						LDR R0, [R0, #4]				; traverse = traverse->next
+						B remove_loop					; go to loop
+						
+remove_head				LDR R4, =FIRST_ELEMENT			; get FIRST_ELEMENT's address
+						LDR R3, [R0, #4]				; get head->next
+						STR R3, [R4]					; store new head to FIRST_ELEMENT 
+						BL Free							; free old head
+						POP{R4, PC}						; pop preserved LR to PC
+						
+remove_free_node		LDR R3, [R0, #4]				; R3 = traverse->next
+						STR R3, [R2, #4]				; prev->next = R3
+						BL Free							; free address
+						POP{R4, PC}						; pop preserved LR to PC
+						
+remove_error_notfound	MOVS R0, #4						; get error code
+						POP{R4, PC}						; return error code
+						
+remove_error_empty		MOVS R0, #3						; get error code
+						POP{R4, PC}						; return error code
 ;//-------- <<< USER CODE END Remove Function >>> ------------------------				
 				ENDFUNC
 				
