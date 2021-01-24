@@ -325,6 +325,7 @@ return_malloc_error		MOVS R0, #0
 ;@param		R0 <- Address to deallocate
 Free			FUNCTION			
 ;//-------- <<< USER CODE BEGIN Free Function >>> ----------------------
+						PUSH{R4}							; preserve registers that will be used inside function
 						LDR R1, =DATA_MEM					; get address of DATA_MEM
 						MOVS R2, #0							; use R2 as allocation table traverser, set it to 0
 						LDR R3, =AT_MEM						; get address of AT_MEM
@@ -336,14 +337,15 @@ free_loop				CMP R1, R0							; check addresses
 						LDR R1, [R3, R2]					; get the word
 						BICS R1, R1, R4						; negate R4
 						STR R1, [R3, R2]					; allocation table write 0
+						POP{R4}								; get back the preserved registers from stack
 						BX LR								; return after freeing address
 
 free_next_check			LSLS R4, #1							; shift left by 1 bit
 						CMP R4, #0							; ensure circular rotation
 						BNE free_next						; if value overflowed
 						MOVS R4, #1							; reset it (if not skip this line)
-free_next				ADDS R2, R2, #4						; increment allocation table traverser
-						ADDS R1, R1, #8						; increment DATA_MEM iterator
+						ADDS R2, R2, #4						; increment allocation table traverser
+free_next				ADDS R1, R1, #8						; increment DATA_MEM iterator
 						B free_loop							; return to loop condition check
 ;//-------- <<< USER CODE END Free Function >>> ------------------------				
 				ENDFUNC
@@ -355,7 +357,53 @@ free_next				ADDS R2, R2, #4						; increment allocation table traverser
 ;@return    R0 <- Error Code
 Insert			FUNCTION			
 ;//-------- <<< USER CODE BEGIN Insert Function >>> ----------------------															
-				
+						PUSH{LR, R4}
+						MOVS R1, R0						; move function argument to R1
+						PUSH{R1}
+						BL Malloc						; allocate space for new node assign it to R0
+						POP{R1}
+						CMP R0, #0						; check if allocation table is full
+						BEQ insert_error_full			; go to here if full
+						
+						STR R1, [R0]					; write value data to new location (newnode->data = data)
+						LDR R2, =FIRST_ELEMENT			; get FIRST_ELEMENT address to R2
+						LDR R2, [R2]					; get FIRST_ELEMENT value which holds to head address
+						MOVS R3, #0						; set R3 to 0 (use this register as tail)
+						STR R3, [R0, #4]				; newnode->next = null
+						
+						CMP R2, #0						; if(head == NULL)
+						BEQ insert_head					; go to here if NULL
+						LDR R4, [R2]					; R4 = head->data
+						CMP R1, R4						; if (value < head->data)
+						BLO insert_head					; if value is smaller than head data go here
+						
+insert_loop				CMP R2, #0						; if (traverse == NULL)
+						BEQ insert_middle				; go to here if NULL
+						LDR R4, [R2]					; temp_data = traverse->data
+						CMP R1, R4						; if (value < temp_data)
+						BLO insert_middle				; if value is smaller go here
+						BEQ error_duplicate				; if (value == temp_data) go here
+						MOVS R3, R2						; copy traverse->data's address
+						LDR R2, [R2, #4]				; R2 = traverse->next
+						B insert_loop					; go back to start of the loop
+						
+insert_head				STR R2, [R0, #4]				; newnode->next = head
+						LDR R2, =FIRST_ELEMENT			; get FIRST_ELEMENT address to R2
+						STR R0, [R2]					; head = newnode (update FIRST_ELEMENT)
+						MOVS R0, #0						; load success message
+						POP{R4, PC}						; return success message
+
+insert_middle			STR R0, [R3, #4]				; prev->next = R0 (newnode's address)
+						STR R2, [R0, #4]				; newnode->next = traverse
+						MOVS R0, #0						; load success message
+						POP{R4, PC}						; return success message
+
+insert_error_full		MOVS R0, #1						; load error message (AT is full)
+						POP{R4, PC}						; return error message
+
+error_duplicate			BL Free							; deallocate memory since it was not used
+						MOVS R0, #2						; load error message (value is duplicate)
+						POP{R4, PC}						; return error message
 ;//-------- <<< USER CODE END Insert Function >>> ------------------------				
 				ENDFUNC
 				
