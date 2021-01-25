@@ -462,6 +462,37 @@ remove_error_empty		MOVS R0, #3						; get error code
 ;@return	R0 <- Error Code
 LinkedList2Arr	FUNCTION			
 ;//-------- <<< USER CODE BEGIN Linked List To Array >>> ----------------------															
+							LDR R0, =ARRAY_MEM			; get Array's first element's address
+							LDR R1, =ARRAY_SIZE			; get size of array
+							MOVS R2, #0					; iterator
+							MOVS R3, #0					; value to be written
+clear_arrmem				CMP R2, R1					; if (iterator == ARRAY_SIZE)
+							BEQ write_toarray			; if end is reached go here
+							
+							STR R3, [R0, R2]			; write 0 to array element
+							ADDS R2, R2, #4				; iterator++
+							B	clear_arrmem			; go to next loop iteration
+
+write_toarray				LDR R1, =FIRST_ELEMENT		; get FIRST_ELEMENT's address
+							LDR R1, [R1]				; get FIRST_ELEMENT's value which points to head
+							CMP R1, #0					; if(head == NULL)
+							BEQ toarray_exit_empty
+							
+							MOVS R2, #0					; use as array iterator
+toarray_loop				CMP R1, #0					; if(traverse == NULL)
+							BEQ toarray_exit_success	; if end is reached go here
+							
+							LDR R3, [R1]				; R3 = traverse->data
+							STR R3, [R0, R2]			; arr[R2] = R3
+							ADDS R2, R2, #4				; go to next array element
+							LDR R1, [R1, #4]			; get traverse->next
+							B toarray_loop
+							
+toarray_exit_empty			MOVS R0, #5					; get error code
+							BX LR						; return error code
+
+toarray_exit_success		MOVS R0, #0					; get success code
+							BX LR						; return success code
 
 ;//-------- <<< USER CODE END Linked List To Array >>> ------------------------				
 				ENDFUNC
