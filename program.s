@@ -514,7 +514,15 @@ WriteErrorLog	FUNCTION
 ;@return	R0 <- Working time of the System Tick Timer (in us).			
 GetNow			FUNCTION			
 ;//-------- <<< USER CODE BEGIN Get Now >>> ----------------------															
-				
+				LDR R0, =0xE000E010					; Get the address of SYST_CSR
+				LDR R1, [R0, #4]					; Get the value of SYST_RVR
+				LDR R2, =TICK_COUNT					; Get the value of TICK_COUNT
+				MULS R2, R1, R2						; multiply SYST_RVR with TICK_COUNT
+				LDR R3, [R0, #8]					; Get the value of SYST_CVR
+				SUBS R1, R1, R3						; reload - current value
+				ADDS R0, R1, R2						; add (reload - current value) to calculated value
+				LSRS R0, #2							; divide R0 by 4 because our CPU Clock Frequency is 4 Mhz
+				BX LR								; return time passed
 ;//-------- <<< USER CODE END Get Now >>> ------------------------
 				ENDFUNC
 				
