@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\linkedlist.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\linkedlist.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6150002: Last Updated: Mon Jan 25 22:08:09 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6150002: Last Updated: Mon Jan 25 23:27:39 2021
 <BR><P>
 <H3>Maximum Stack Usage =          0 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -25,7 +25,6 @@ Mutually Recursive functions
  <LI><a href="#[d]">Interrupt7_Handler</a>&nbsp;&nbsp;&nbsp;&rArr;&nbsp;&nbsp;&nbsp;<a href="#[d]">Interrupt7_Handler</a><BR>
  <LI><a href="#[e]">Interrupt8_Handler</a>&nbsp;&nbsp;&nbsp;&rArr;&nbsp;&nbsp;&nbsp;<a href="#[e]">Interrupt8_Handler</a><BR>
  <LI><a href="#[f]">Interrupt9_Handler</a>&nbsp;&nbsp;&nbsp;&rArr;&nbsp;&nbsp;&nbsp;<a href="#[f]">Interrupt9_Handler</a><BR>
- <LI><a href="#[17]">Free</a>&nbsp;&nbsp;&nbsp;&rArr;&nbsp;&nbsp;&nbsp;<a href="#[17]">Free</a><BR>
 </UL>
 <P>
 <H3>
@@ -155,25 +154,29 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_armcm0plus.o(RESET)
 </UL>
-<P><STRONG><a name="[18]"></a>__use_two_region_memory</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, heapauxi.o(.text), UNUSED)
+<P><STRONG><a name="[1e]"></a>__use_two_region_memory</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, heapauxi.o(.text), UNUSED)
 
-<P><STRONG><a name="[19]"></a>__rt_heap_escrow$2region</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, heapauxi.o(.text), UNUSED)
+<P><STRONG><a name="[1f]"></a>__rt_heap_escrow$2region</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, heapauxi.o(.text), UNUSED)
 
-<P><STRONG><a name="[1a]"></a>__rt_heap_expand$2region</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, heapauxi.o(.text), UNUSED)
+<P><STRONG><a name="[20]"></a>__rt_heap_expand$2region</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, heapauxi.o(.text), UNUSED)
 
 <P><STRONG><a name="[10]"></a>SystemInit</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, system_armcm0plus.o(.text.SystemInit))
 <BR>[Address Reference Count : 1]<UL><LI> startup_armcm0plus.o(.text)
 </UL>
 <P><STRONG><a name="[11]"></a>__main</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
-<BR><BR>[Calls]<UL><LI><a href="#[15]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Init_GlobVars
-<LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Clear_ErrorLogs
-<LI><a href="#[13]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Clear_Alloc
+<BR><BR>[Calls]<UL><LI><a href="#[16]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Init_GlobVars
+<LI><a href="#[15]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Clear_ErrorLogs
+<LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Clear_Alloc
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Init
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_armcm0plus.o(.text)
 </UL>
-<P><STRONG><a name="[5]"></a>SysTick_Handler</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
-<BR><BR>[Calls]<UL><LI><a href="#[16]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Malloc
+<P><STRONG><a name="[5]"></a>SysTick_Handler</STRONG> (Thumb, 104 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Calls]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WriteErrorLog
+<LI><a href="#[1b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LinkedList2Arr
+<LI><a href="#[1a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Remove
+<LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Insert
+<LI><a href="#[13]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Stop
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_armcm0plus.o(RESET)
 </UL><P>
@@ -184,28 +187,56 @@ Local Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
 </UL>
 
-<P><STRONG><a name="[13]"></a>Clear_Alloc</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
-<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
-
-<P><STRONG><a name="[14]"></a>Clear_ErrorLogs</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
-<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
-
-<P><STRONG><a name="[15]"></a>Init_GlobVars</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
-<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-</UL>
-
-<P><STRONG><a name="[16]"></a>Malloc</STRONG> (Thumb, 64 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<P><STRONG><a name="[13]"></a>SysTick_Stop</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
 <BR><BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Handler
-<LI><a href="#[17]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Free
 </UL>
 
-<P><STRONG><a name="[17]"></a>Free</STRONG> (Thumb, 38 bytes, Stack size 0 bytes, program.o(MAINFUNCTION), UNUSED, KEPT)
-<BR><BR>[Calls]<UL><LI><a href="#[17]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Free
-<LI><a href="#[16]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Malloc
+<P><STRONG><a name="[14]"></a>Clear_Alloc</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
 </UL>
-<BR>[Called By]<UL><LI><a href="#[17]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Free
+
+<P><STRONG><a name="[15]"></a>Clear_ErrorLogs</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[16]"></a>Init_GlobVars</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Called By]<UL><LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
+</UL>
+
+<P><STRONG><a name="[17]"></a>Malloc</STRONG> (Thumb, 64 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Called By]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Insert
+</UL>
+
+<P><STRONG><a name="[18]"></a>Free</STRONG> (Thumb, 38 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Called By]<UL><LI><a href="#[1a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Remove
+<LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Insert
+</UL>
+
+<P><STRONG><a name="[19]"></a>Insert</STRONG> (Thumb, 84 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Calls]<UL><LI><a href="#[18]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Free
+<LI><a href="#[17]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Malloc
+</UL>
+<BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Handler
+</UL>
+
+<P><STRONG><a name="[1a]"></a>Remove</STRONG> (Thumb, 66 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Calls]<UL><LI><a href="#[18]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Free
+</UL>
+<BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Handler
+</UL>
+
+<P><STRONG><a name="[1b]"></a>LinkedList2Arr</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Handler
+</UL>
+
+<P><STRONG><a name="[1c]"></a>WriteErrorLog</STRONG> (Thumb, 46 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Calls]<UL><LI><a href="#[1d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GetNow
+</UL>
+<BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Handler
+</UL>
+
+<P><STRONG><a name="[1d]"></a>GetNow</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, program.o(MAINFUNCTION))
+<BR><BR>[Called By]<UL><LI><a href="#[1c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WriteErrorLog
 </UL>
 <P>
 <H3>

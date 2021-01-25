@@ -5,6 +5,8 @@ Component: ARM Compiler 6.15 Tool: armlink [5dd79300]
 Section Cross References
 
     program.o(MAINFUNCTION) refers to program.o(GLOBAL_VARIABLES) for PROGRAM_STATUS
+    program.o(MAINFUNCTION) refers to program.o(IN_DATA_AREA) for IN_DATA
+    program.o(MAINFUNCTION) refers to program.o(IN_DATA_FLAG_AREA) for IN_DATA_FLAG
     program.o(MAINFUNCTION) refers to program.o(ALLOCATION_TABLE) for AT_MEM
     program.o(MAINFUNCTION) refers to program.o(ARRAY_AREA) for LOG_MEM
     program.o(MAINFUNCTION) refers to program.o(DATA_AREA) for DATA_MEM
@@ -27,15 +29,13 @@ Section Cross References
 
 Removing Unused input sections from the image.
 
-    Removing program.o(IN_DATA_AREA), (56 bytes).
-    Removing program.o(IN_DATA_FLAG_AREA), (56 bytes).
     Removing startup_armcm0plus.o(HEAP), (3072 bytes).
     Removing system_armcm0plus.o(.text), (0 bytes).
     Removing system_armcm0plus.o(.text.SystemCoreClockUpdate), (16 bytes).
     Removing system_armcm0plus.o(.ARM.exidx.text.SystemCoreClockUpdate), (8 bytes).
     Removing system_armcm0plus.o(.ARM.exidx.text.SystemInit), (8 bytes).
 
-7 unused section(s) (total 3216 bytes) removed from the image.
+5 unused section(s) (total 3104 bytes) removed from the image.
 
 ==============================================================================
 
@@ -56,19 +56,31 @@ Image Symbol Table
     [Anonymous Symbol]                       0x000000f4   Section        0  system_armcm0plus.o(.text.SystemInit)
     __arm_cp.1_0                             0x000000fc   Number         4  system_armcm0plus.o(.text.SystemInit)
     __arm_cp.1_1                             0x00000100   Number         4  system_armcm0plus.o(.text.SystemInit)
-    MAINFUNCTION                             0x00000104   Section      524  program.o(MAINFUNCTION)
-    SysTick_Init                             0x00000127   Thumb Code    22  program.o(MAINFUNCTION)
-    Clear_Alloc                              0x0000014f   Thumb Code    20  program.o(MAINFUNCTION)
-    Clear_ErrorLogs                          0x00000163   Thumb Code    20  program.o(MAINFUNCTION)
-    Init_GlobVars                            0x00000177   Thumb Code    24  program.o(MAINFUNCTION)
-    Malloc                                   0x0000018f   Thumb Code    64  program.o(MAINFUNCTION)
-    Free                                     0x000001cf   Thumb Code    38  program.o(MAINFUNCTION)
+    MAINFUNCTION                             0x00000104   Section      680  program.o(MAINFUNCTION)
+    SysTick_Init                             0x00000187   Thumb Code    22  program.o(MAINFUNCTION)
+    SysTick_Stop                             0x0000019d   Thumb Code    18  program.o(MAINFUNCTION)
+    Clear_Alloc                              0x000001af   Thumb Code    20  program.o(MAINFUNCTION)
+    Clear_ErrorLogs                          0x000001c3   Thumb Code    20  program.o(MAINFUNCTION)
+    Init_GlobVars                            0x000001d7   Thumb Code    24  program.o(MAINFUNCTION)
+    Malloc                                   0x000001ef   Thumb Code    64  program.o(MAINFUNCTION)
+    Free                                     0x0000022f   Thumb Code    38  program.o(MAINFUNCTION)
+    Insert                                   0x00000255   Thumb Code    84  program.o(MAINFUNCTION)
+    Remove                                   0x000002a9   Thumb Code    66  program.o(MAINFUNCTION)
+    LinkedList2Arr                           0x000002eb   Thumb Code    50  program.o(MAINFUNCTION)
+    WriteErrorLog                            0x0000031d   Thumb Code    46  program.o(MAINFUNCTION)
+    GetNow                                   0x0000034b   Thumb Code    18  program.o(MAINFUNCTION)
+    IN_DATA                                  0x000003ac   Data          56  program.o(IN_DATA_AREA)
+    IN_DATA_AREA                             0x000003ac   Section       56  program.o(IN_DATA_AREA)
+    END_IN_DATA                              0x000003e4   Data           0  program.o(IN_DATA_AREA)
+    IN_DATA_FLAG                             0x000003e4   Data          56  program.o(IN_DATA_FLAG_AREA)
+    IN_DATA_FLAG_AREA                        0x000003e4   Section       56  program.o(IN_DATA_FLAG_AREA)
     AT_MEM                                   0x20000004   Data          80  program.o(ALLOCATION_TABLE)
     ALLOCATION_TABLE                         0x20000004   Section       80  program.o(ALLOCATION_TABLE)
     ARRAY_MEM                                0x20000054   Data        2560  program.o(ARRAY_AREA)
     ARRAY_AREA                               0x20000054   Section    10240  program.o(ARRAY_AREA)
     LOG_MEM                                  0x20000a54   Data        7680  program.o(ARRAY_AREA)
     DATA_MEM                                 0x20002854   Data        5120  program.o(DATA_AREA)
+    __LOG_END                                0x20002854   Data           0  program.o(ARRAY_AREA)
     DATA_AREA                                0x20002854   Section     5120  program.o(DATA_AREA)
     TICK_COUNT                               0x20003c54   Data           4  program.o(GLOBAL_VARIABLES)
     GLOBAL_VARIABLES                         0x20003c54   Section       20  program.o(GLOBAL_VARIABLES)
@@ -106,7 +118,7 @@ Image Symbol Table
     __rt_heap_expand$2region                 0x000000f1   Thumb Code     2  heapauxi.o(.text)
     SystemInit                               0x000000f5   Thumb Code    16  system_armcm0plus.o(.text.SystemInit)
     __main                                   0x00000105   Thumb Code    26  program.o(MAINFUNCTION)
-    SysTick_Handler                          0x0000011f   Thumb Code     8  program.o(MAINFUNCTION)
+    SysTick_Handler                          0x0000011f   Thumb Code   104  program.o(MAINFUNCTION)
     SystemCoreClock                          0x20000000   Data           4  system_armcm0plus.o(.data.SystemCoreClock)
     __stack_limit                            0x20003c68   Data           0  startup_armcm0plus.o(STACK)
     __initial_sp                             0x20004068   Data           0  startup_armcm0plus.o(STACK)
@@ -119,9 +131,9 @@ Memory Map of the image
 
   Image Entry point : 0x000000c1
 
-  Load Region LR_1 (Base: 0x00000000, Size: 0x00003f78, Max: 0xffffffff, ABSOLUTE)
+  Load Region LR_1 (Base: 0x00000000, Size: 0x00004084, Max: 0xffffffff, ABSOLUTE)
 
-    Execution Region ER_RO (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00000310, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RO (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x0000041c, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -130,21 +142,23 @@ Memory Map of the image
     0x000000ec   0x000000ec   0x00000006   Code   RO           34    .text               c_p.l(heapauxi.o)
     0x000000f2   0x000000f2   0x00000002   PAD
     0x000000f4   0x000000f4   0x00000010   Code   RO           23    .text.SystemInit    system_armcm0plus.o
-    0x00000104   0x00000104   0x0000020c   Code   RO            7  * MAINFUNCTION        program.o
+    0x00000104   0x00000104   0x000002a8   Code   RO            7  * MAINFUNCTION        program.o
+    0x000003ac   0x000003ac   0x00000038   Data   RO            1    IN_DATA_AREA        program.o
+    0x000003e4   0x000003e4   0x00000038   Data   RO            2    IN_DATA_FLAG_AREA   program.o
 
 
-    Execution Region ER_RW (Exec base: 0x20000000, Load base: 0x00000310, Size: 0x00003c68, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RW (Exec base: 0x20000000, Load base: 0x0000041c, Size: 0x00003c68, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x00000310   0x00000004   Data   RW           25    .data.SystemCoreClock  system_armcm0plus.o
-    0x20000004   0x00000314   0x00000050   Data   RW            4    ALLOCATION_TABLE    program.o
-    0x20000054   0x00000364   0x00002800   Data   RW            6    ARRAY_AREA          program.o
-    0x20002854   0x00002b64   0x00001400   Data   RW            5    DATA_AREA           program.o
-    0x20003c54   0x00003f64   0x00000014   Data   RW            3    GLOBAL_VARIABLES    program.o
+    0x20000000   0x0000041c   0x00000004   Data   RW           25    .data.SystemCoreClock  system_armcm0plus.o
+    0x20000004   0x00000420   0x00000050   Data   RW            4    ALLOCATION_TABLE    program.o
+    0x20000054   0x00000470   0x00002800   Data   RW            6    ARRAY_AREA          program.o
+    0x20002854   0x00002c70   0x00001400   Data   RW            5    DATA_AREA           program.o
+    0x20003c54   0x00004070   0x00000014   Data   RW            3    GLOBAL_VARIABLES    program.o
 
 
-    Execution Region ER_ZI (Exec base: 0x20003c68, Load base: 0x00003f78, Size: 0x00000400, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_ZI (Exec base: 0x20003c68, Load base: 0x00004084, Size: 0x00000400, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -158,12 +172,12 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       524         66          0      15460          0        988   program.o
+       680         80        112      15460          0       1096   program.o
         44          8        192          0       1024        952   startup_armcm0plus.o
         16          8          0          4          0        657   system_armcm0plus.o
 
     ----------------------------------------------------------------------
-       584         82        192      15464       1024       2597   Object Totals
+       740         96        304      15464       1024       2705   Object Totals
          0          0          0          0          0          0   (incl. Generated)
          0          0          0          0          0          0   (incl. Padding)
 
@@ -193,15 +207,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-       592         82        192      15464       1024       2681   Grand Totals
-       592         82        192      15464       1024       2681   ELF Image Totals
-       592         82        192      15464          0          0   ROM Totals
+       748         96        304      15464       1024       2789   Grand Totals
+       748         96        304      15464       1024       2789   ELF Image Totals
+       748         96        304      15464          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                  784 (   0.77kB)
+    Total RO  Size (Code + RO Data)                 1052 (   1.03kB)
     Total RW  Size (RW Data + ZI Data)             16488 (  16.10kB)
-    Total ROM Size (Code + RO Data + RW Data)      16248 (  15.87kB)
+    Total ROM Size (Code + RO Data + RW Data)      16516 (  16.13kB)
 
 ==============================================================================
 

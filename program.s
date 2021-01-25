@@ -157,10 +157,55 @@ STOP			B	STOP						; Infinite loop.
 ;@brief 	This function will be used for System Tick Handler
 SysTick_Handler	FUNCTION			
 ;//-------- <<< USER CODE BEGIN System Tick Handler >>> ----------------------															
-				EXPORT SysTick_Handler
-				PUSH{LR}
-				BL Malloc
-				POP{PC}
+					EXPORT SysTick_Handler
+					PUSH{LR, R4-R7}
+					LDR R0, =TICK_COUNT				; get TICK_COUNT's address
+					LDR R1, [R0]					; get TICK_COUNT's value
+					ADDS R1, R1, #1					; increment TICK_COUNT
+					STR R1, [R0]					; store incremented TICK_COUNT
+					LDR R4, =INDEX_INPUT_DS			; get INDEX_INPUT_DS's address
+					LDR R5, [R4]					; get INDEX_INPUT_DS's value
+					LDR R0, =IN_DATA				; get IN_DATA address
+					LDR R1, =IN_DATA_FLAG			; get IN_DATA_FLAG address
+					MOVS R2, #4						; array element size
+					MULS R2, R5, R2					; multiply index by array element size
+					LDR R6,	[R0, R2]				; get data
+					LDR R7, [R1, R2]				; get operation
+					CMP R7, #0						; if op is remove
+					BEQ Handler_remove
+					CMP R7, #1						; if op is insert
+					BEQ Handler_insert
+					CMP R7, #2						; if op is linkedlist2array
+					BEQ Handler_ll2a
+					MOVS R0, #6						; write no operation
+Handler_writeError	CMP R0, #0						; if there is no error
+					BEQ Handler_return				; don't write to LOG_MEM
+					MOVS R1, R0						; move error code to R1 as argument
+					MOVS R0, R5						; get INDEX_INPUT_DS's value as argument
+					MOVS R2, R7						; get operation as argument
+					MOVS R3, R6						; get input data as argument
+					BL WriteErrorLog				; WriteErrorLog(Index, ErrorCode, Operation, Data)
+Handler_return		ADDS R5, R5, #1					; INDEX_INPUT_DS's value ++
+					STR R5, [R4]					; store incremented INDEX_INPUT_DS
+					MOVS R3, #4						; array element size
+					MULS R3, R5, R3					; get offset
+					LDR R0, =IN_DATA				; get IN_DATA address
+					ADDS R3, R3, R0					; get actual address
+					LDR R2, =END_IN_DATA			; get end of input dataset array
+					CMP R3, R2						; check if we reached end
+					BEQ Handler_End					; if so, branch here
+					POP{R7, R6, R5, R4, PC}			; return from SysTick
+				
+Handler_remove		MOVS R0, R6						; get data as argument (R0)
+					BL Remove						; Remove(data)
+					B Handler_writeError			; go to error writing portion
+Handler_insert		MOVS R0, R6						; get data as argument (R0)
+					BL Insert						; Insert(data)
+					B Handler_writeError			; go to error writing portion
+Handler_ll2a		BL LinkedList2Arr				; LinkedList2Arr()
+					B Handler_writeError
+Handler_End			BL SysTick_Stop
+					POP{R7, R6, R5, R4, PC}			; return from SysTick
 ;//-------- <<< USER CODE END System Tick Handler >>> ------------------------				
 				ENDFUNC
 
@@ -504,9 +549,34 @@ toarray_exit_success		MOVS R0, #0					; get success code
 ;@param     R1 -> Error Code 
 ;@param     R2 -> Operation (Insertion / Deletion / LinkedList2Array)
 ;@param     R3 -> Data
-WriteErrorLog	FUNCTION			
+WriteErrorLog	FUNCTION
 ;//-------- <<< USER CODE BEGIN Write Error Log >>> ----------------------															
-				
+							; don't forget to push R (LR)
+							PUSH{LR, R4-R6}					; preserve registers to stack
+							LDR R4, =__LOG_END				; get end of LOG_MEM
+							LDR R5, =INDEX_ERROR_LOG		; get INDEX_ERROR_LOG's address
+							LDR R6, [R5]					; get INDEX_ERROR_LOG's value which holds an address
+							CMP R6, #0						; if INDEX_ERROR_LOG is not set
+							BEQ set_error_index				; go here
+							CMP R4, R6						; if INDEX_ERROR_LOG == End of the Log array
+							BEQ writeLog_return				; if log array is full exit function
+							
+writeLog_write				LSLS R0, #16					; shift index to left by 16 bits
+							LSLS R1, #8						; shift error code to left by 8 bits
+							ORRS R0, R0, R1					; OR index and error code
+							ORRS R0, R0, R2					; OR R0 and operation
+							STR R0, [R6]					; store first word
+							STR R3, [R6, #4]				; store second word (data)
+							BL GetNow						; get current time
+							STR R0, [R6, #8]				; store third word (timestamp)
+							ADDS R6, R6, #12				; increment index
+							STR R6, [R5]					; store incremented index to INDEX_ERROR_LOG
+writeLog_return				POP{R6, R5, R4, PC}				; get preserved registers and return
+
+set_error_index				LDR R6, =LOG_MEM				; get LOG_MEM's start
+							STR R6, [R5]					; store LOG_MEM's start to INDEX_ERROR_LOG
+							B writeLog_write				; go to writing operation
+							
 ;//-------- <<< USER CODE END Write Error Log >>> ------------------------				
 				ENDFUNC
 				
