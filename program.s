@@ -240,9 +240,15 @@ SysTick_Stop	FUNCTION
 				; turn off timer
 				LDR R0, =0xE000E010					; Get the address of SYST_CSR
 				LDR R1, [R0]						; Get value of SYST_CSR
-				LDR R2, =0xFFFFFFFE					; intermediate value
-				ANDS R1, R1, R2						; clear the least significant 3 bits of SYST_CSR
+				LDR R2, =0xFFFFFFFC					; Disable TICKINT and ENABLE bits
+				ANDS R1, R1, R2						; clear the least significant 2 bits of SYST_CSR
 				STR R1, [R0]						; Store back the value to SYST_CSR
+				; clear the interrupt flag
+				LDR R0, =0xE000ED04					; load address of ICSR
+				LDR R2, [R0]						; get value of ICSR
+				LDR R1, =0x02000000					; set PENDSTCLR bit of ICSR to 1
+				ORRS R2, R2, R1						; combine value and R1
+				STR R2, [R0]						; store cleared flag back
 				;update the program status register
 				LDR R0, =PROGRAM_STATUS				; Get the address of PROGRAM_STATUS variable
 				MOVS R1, #2							; store value 2 in R1
