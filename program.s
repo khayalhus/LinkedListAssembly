@@ -486,11 +486,13 @@ remove_head				LDR R4, =FIRST_ELEMENT			; get FIRST_ELEMENT's address
 						LDR R3, [R0, #4]				; get head->next
 						STR R3, [R4]					; store new head to FIRST_ELEMENT 
 						BL Free							; free old head
+						MOVS R0, #0						; get success code
 						POP{R4, PC}						; pop preserved LR to PC
 						
 remove_free_node		LDR R3, [R0, #4]				; R3 = traverse->next
 						STR R3, [R2, #4]				; prev->next = R3
 						BL Free							; free address
+						MOVS R0, #0						; get success code
 						POP{R4, PC}						; pop preserved LR to PC
 						
 remove_error_notfound	MOVS R0, #4						; get error code
@@ -586,10 +588,12 @@ GetNow			FUNCTION
 ;//-------- <<< USER CODE BEGIN Get Now >>> ----------------------															
 				LDR R0, =0xE000E010					; Get the address of SYST_CSR
 				LDR R1, [R0, #4]					; Get the value of SYST_RVR
-				LDR R2, =TICK_COUNT					; Get the value of TICK_COUNT
+				LDR R2, =TICK_COUNT					; Get the address of TICK_COUNT
+				LDR R2, [R2]						; Get the value from TICK_COUNT
 				MULS R2, R1, R2						; multiply SYST_RVR with TICK_COUNT
 				LDR R3, [R0, #8]					; Get the value of SYST_CVR
 				SUBS R1, R1, R3						; reload - current value
+				MOVS R0, #0							; reset R0
 				ADDS R0, R1, R2						; add (reload - current value) to calculated value
 				LSRS R0, #2							; divide R0 by 4 because our CPU Clock Frequency is 4 Mhz
 				BX LR								; return time passed
