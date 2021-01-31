@@ -172,11 +172,11 @@ SysTick_Handler	FUNCTION
 					LDR R6,	[R0, R2]				; get data
 					LDR R7, [R1, R2]				; get operation
 					CMP R7, #0						; if op is remove
-					BEQ Handler_remove
+					BEQ Handler_remove				; go to Handler remove
 					CMP R7, #1						; if op is insert
-					BEQ Handler_insert
+					BEQ Handler_insert				; go to Handler insert
 					CMP R7, #2						; if op is linkedlist2array
-					BEQ Handler_ll2a
+					BEQ Handler_ll2a				; go to Handler linkedlist2array
 					MOVS R0, #6						; write no operation
 Handler_writeError	CMP R0, #0						; if there is no error
 					BEQ Handler_return				; don't write to LOG_MEM
@@ -203,8 +203,8 @@ Handler_insert		MOVS R0, R6						; get data as argument (R0)
 					BL Insert						; Insert(data)
 					B Handler_writeError			; go to error writing portion
 Handler_ll2a		BL LinkedList2Arr				; LinkedList2Arr()
-					B Handler_writeError
-Handler_End			BL SysTick_Stop
+					B Handler_writeError			; go to error writing portion
+Handler_End			BL SysTick_Stop					; call SysTick_Stop()
 					POP{R7, R6, R5, R4, PC}			; return from SysTick
 ;//-------- <<< USER CODE END System Tick Handler >>> ------------------------				
 				ENDFUNC
@@ -214,6 +214,13 @@ Handler_End			BL SysTick_Stop
 ;@brief 	This function will be used to initiate System Tick Handler
 SysTick_Init	FUNCTION			
 ;//-------- <<< USER CODE BEGIN System Tick Timer Initialize >>> ----------------------
+				;CPU Clock Frequency: 4 MHz (4 * 10^6 Hz)
+				;Period Of the System Tick Timer Interrupt: 985 µs (0.000985 sec) (985 * 10^-3 sec)
+				;ReloadValue + 1 = Freq * Period
+				;ReloadValue + 1 = 4 * 10^6 Hz * 0.000985 sec
+				;ReloadValue + 1 = 3940
+				;ReloadValue = 3939
+				;3939 decimal = F63 in hexadecimal
 				;initializes System Tick Timer registers
 				LDR R0, =0xE000E010					; Get the address of SYST_CSR
 				LDR R1, =0xF63						; Calculated Reload Value (3939 decimal)
@@ -327,7 +334,7 @@ Init_GlobVars	FUNCTION
 ;@return 	R0 <- The allocated area address
 Malloc			FUNCTION			
 ;//-------- <<< USER CODE BEGIN System Tick Handler >>> ----------------------	
-						PUSH{R4-R7}
+						PUSH{R4-R7}					; preserve R4-R7
 						MOVS R0, #0					; use as word iterator, set it to 0 (0->AT_SIZE)
 						MOVS R6, #0					; use as bit accumulator	(0->AT_SIZE)
 						LDR R1, =AT_SIZE			; get AT_SIZE value
@@ -353,10 +360,10 @@ malloc_loop2			CMP R5, #32					; if equal to 32
 return_exit_loop2		ADDS R0, R0, #4				; go to next word
 						B malloc_loop1				; go to next iteration of first for loop
 						
-return_malloc_address	ORRS R3, R3, R4							; found area marked as 1 because this field going to used
+return_malloc_address	ORRS R3, R3, R4				; found area marked as 1 because this field going to used
 						STR R3, [R2, R0]			; allocation table updated
 						LDR R0, =DATA_MEM			; R0 gets DATA_MEM's address
-						MOVS R1, #8				; Each cell has 2 word and each word is 4 byte.
+						MOVS R1, #8					; Each cell has 2 word and each word is 4 byte.
 						MULS R6, R1, R6				; R6 contains the information that how many iteration that we did and by multiplying it by R1 gives kind of offset
 						ADDS R0, R6, R0				; by adding R6 to R0, R0 has new allocable areas address
 						POP{R7, R6, R5, R4}			; pop preserved registers R4-R7
@@ -408,19 +415,19 @@ free_next				ADDS R1, R1, #8						; increment DATA_MEM iterator
 ;@return    R0 <- Error Code
 Insert			FUNCTION			
 ;//-------- <<< USER CODE BEGIN Insert Function >>> ----------------------															
-						PUSH{LR, R4}
+						PUSH{LR, R4}					; preserve R4 and LR
 						MOVS R1, R0						; move function argument to R1
-						PUSH{R1}
+						PUSH{R1}						; preserve R1
 						BL Malloc						; allocate space for new node assign it to R0
-						POP{R1}
+						POP{R1}							; get preserved R1
 						CMP R0, #0						; check if allocation table is full
 						BEQ insert_error_full			; go to here if full
 						
 						STR R1, [R0]					; write value data to new location (newnode->data = data)
-						LDR R2, =FIRST_ELEMENT			; get FIRST_ELEMENT address to R2
-						LDR R2, [R2]					; get FIRST_ELEMENT value which holds to head address
 						MOVS R3, #0						; set R3 to 0 (use this register as tail)
 						STR R3, [R0, #4]				; newnode->next = null
+						LDR R2, =FIRST_ELEMENT			; get FIRST_ELEMENT address to R2
+						LDR R2, [R2]					; get FIRST_ELEMENT value which holds to head address
 						
 						CMP R2, #0						; if(head == NULL)
 						BEQ insert_head					; go to here if NULL
@@ -529,7 +536,7 @@ clear_arrmem				CMP R2, R1					; if (iterator == ARRAY_SIZE)
 write_toarray				LDR R1, =FIRST_ELEMENT		; get FIRST_ELEMENT's address
 							LDR R1, [R1]				; get FIRST_ELEMENT's value which points to head
 							CMP R1, #0					; if(head == NULL)
-							BEQ toarray_exit_empty
+							BEQ toarray_exit_empty		; if null go here
 							
 							MOVS R2, #0					; use as array iterator
 toarray_loop				CMP R1, #0					; if(traverse == NULL)
