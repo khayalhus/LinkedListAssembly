@@ -347,22 +347,22 @@ malloc_loop2			CMP R5, #32					; if equal to 32
 						BEQ return_malloc_address	; return the address of it
 						ADDS R5, R5, #1				; increment bit iterator
 						ADDS R6, R6, #1				; increment bit accumulator
-						LSLS R4, #1					; do bitwise right shift
+						LSLS R4, #1					; do bitwise left shift
 						B malloc_loop2				; go to next iteration of second for loop
 						
 return_exit_loop2		ADDS R0, R0, #4				; go to next word
 						B malloc_loop1				; go to next iteration of first for loop
 						
-return_malloc_address	ORRS R3, R3, R4				
-						STR R3, [R2, R0]
-						LDR R0, =DATA_MEM
-						MOVS R1, #8
-						MULS R6, R1, R6
-						ADDS R0, R6, R0
-						POP{R7, R6, R5, R4}
-						BX LR
+return_malloc_address	ORRS R3, R3, R4							; found area marked as 1 because this field going to used
+						STR R3, [R2, R0]			; allocation table updated
+						LDR R0, =DATA_MEM			; R0 gets DATA_MEM's address
+						MOVS R1, #8				; Each cell has 2 word and each word is 4 byte.
+						MULS R6, R1, R6				; R6 contains the information that how many iteration that we did and by multiplying it by R1 gives kind of offset
+						ADDS R0, R6, R0				; by adding R6 to R0, R0 has new allocable areas address
+						POP{R7, R6, R5, R4}			; pop preserved registers R4-R7
+						BX LR					
 						
-return_malloc_error		MOVS R0, #0
+return_malloc_error		MOVS R0, #0						; it cannot allocate any area, so return 0 as asked.
 						BX LR
 						
 						
