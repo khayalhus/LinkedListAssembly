@@ -22,7 +22,15 @@
 ; * See the License for the specific language governing permissions and
 ; * limitations under the License.
 ; */
-
+;
+;@PROJECT GROUP
+;@groupno 37
+;@member1 Ali Kerem Yildiz
+;@member2 Yekta Can Tursun
+;@member3 Elaa Jamazi
+;@member4 Lal Verda Cakir
+;@member5 Khayal Huseynov
+;
 ;//-------- <<< Use Configuration Wizard in Context Menu >>> ------------------
 
 
@@ -105,7 +113,7 @@ Reset_Handler   PROC
                 EXPORT   Reset_Handler             [WEAK]
                 IMPORT   SystemInit
                 IMPORT   __main
-				IMPORT	 SysTick_Handler
+				IMPORT	 SysTick_Handler					; import the SysTick_Handler that we wrote
 
                 LDR      R0, =SystemInit
                 BLX      R0
@@ -137,7 +145,7 @@ $Handler_Name   PROC
                 Set_Default_Handler  NMI_Handler
                 Set_Default_Handler  SVC_Handler
                 Set_Default_Handler  PendSV_Handler
-                ;Set_Default_Handler  SysTick_Handler
+                ;Set_Default_Handler  SysTick_Handler		; comment out the default SysTick handler function
 
                 Set_Default_Handler  Interrupt0_Handler
                 Set_Default_Handler  Interrupt1_Handler
